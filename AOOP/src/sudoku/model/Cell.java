@@ -1,5 +1,7 @@
 package sudoku.model;
 
+// One square on the Sudoku board.
+// 0 means empty, and a non-zero initial value makes the cell fixed.
 public class Cell {
 
     // current value of the cell (0 means empty)

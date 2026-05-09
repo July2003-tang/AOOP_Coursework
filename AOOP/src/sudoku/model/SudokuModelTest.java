@@ -35,6 +35,13 @@ public class SudokuModelTest {
      * 345286179
      */
 
+    /*
+     * The tests are deliberately grouped around three different Model duties:
+     * 1. Cell input rules: editable cells, fixed cells, and invalid values.
+     * 2. Player operations: clear, undo, reset, hint, and new game.
+     * 3. Sudoku rules: duplicate detection and completion checking.
+     */
+
     private static final int[][] FIRST_PUZZLE_SOLUTION = {
             {5,3,4,6,7,8,9,1,2},
             {6,7,2,1,9,5,3,4,8},
@@ -102,7 +109,7 @@ public class SudokuModelTest {
     public void testInvalidMoveAllowedWhenValidationDisabled() {
         // Scenario:
         // Validation flag is OFF.
-        // Insert invalid number.
+        // Insert a duplicate value in row 0.
         // Expected:
         // Move allowed but board not complete.
 
@@ -115,6 +122,20 @@ public class SudokuModelTest {
         assertEquals(5, model.getValue(0, 2));
         assertFalse(model.isBoardValid());
         assertFalse(model.isComplete());
+    }
+
+    @Test
+    public void testHasConflictDetectsDuplicateCell() {
+        // Scenario:
+        // Enter a duplicate value in row 0.
+        // Expected:
+        // The duplicate cell reports a conflict.
+
+        SudokuModel model = new SudokuModel(PUZZLE_FILE);
+
+        model.setValue(0, 2, 5);
+
+        assertTrue(model.hasConflict(0, 2));
     }
 
     @Test
@@ -159,6 +180,39 @@ public class SudokuModelTest {
         assertTrue(model.undo());
         assertFalse(model.undo());
         assertEquals(0, model.getValue(0, 2));
+    }
+
+    @Test
+    public void testClearEditableCell() {
+        // Scenario:
+        // Enter a value in an editable cell, then clear it.
+        // Expected:
+        // The cell becomes empty again.
+
+        SudokuModel model = new SudokuModel(PUZZLE_FILE);
+
+        model.setValue(0, 2, 4);
+        boolean result = model.clearValue(0, 2);
+
+        assertTrue(result);
+        assertEquals(0, model.getValue(0, 2));
+    }
+
+    @Test
+    public void testFixedCellCannotBeCleared() {
+        // Scenario:
+        // Cell (0,0) is fixed.
+        // Try to clear it.
+        // Expected:
+        // Operation is rejected and the fixed value remains unchanged.
+
+        SudokuModel model = new SudokuModel(PUZZLE_FILE);
+
+        int original = model.getValue(0, 0);
+        boolean result = model.clearValue(0, 0);
+
+        assertFalse(result);
+        assertEquals(original, model.getValue(0, 0));
     }
 
     @Test
@@ -269,6 +323,22 @@ public class SudokuModelTest {
 
         assertFalse(model.isComplete());
     }
+
+    @Test
+    public void testInvalidValueRejected() {
+        // Scenario:
+        // Try to enter a value outside 1-9.
+        // Expected:
+        // Operation is rejected and the cell stays empty.
+
+        SudokuModel model = new SudokuModel(PUZZLE_FILE);
+
+        boolean result = model.setValue(0, 2, 10);
+
+        assertFalse(result);
+        assertEquals(0, model.getValue(0, 2));
+    }
+
 
     private void fillSolution(SudokuModel model) {
         for (int r = 0; r < 9; r++) {

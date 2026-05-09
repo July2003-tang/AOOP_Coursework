@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+// Reads puzzles.txt and converts each 9-line puzzle into a Board.
+// The file can use 0 or . for empty cells.
 public class PuzzleLoader {
 
     // standard Sudoku size

@@ -1,5 +1,7 @@
 package sudoku.model;
 
+// Stores one user action for single-level undo.
+// The model only keeps the latest Move, not a whole history stack.
 public class Move {
 
     // row index of the move (0-8)
