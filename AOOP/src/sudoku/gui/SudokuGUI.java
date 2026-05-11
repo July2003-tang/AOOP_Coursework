@@ -1,6 +1,7 @@
 package sudoku.gui;
 
 import sudoku.controller.SudokuController;
+import sudoku.model.SudokuGameModel;
 import sudoku.model.SudokuModel;
 
 import javax.swing.SwingUtilities;
@@ -13,7 +14,7 @@ public class SudokuGUI {
         // Swing windows should be created on the event dispatch thread.
         SwingUtilities.invokeLater(() -> {
             // GUI startup creates the three MVC parts and connects them.
-            SudokuModel model = new SudokuModel(PUZZLE_FILE);
+            SudokuGameModel model = new SudokuModel(PUZZLE_FILE);
             SudokuView view = new SudokuView(model);
             SudokuController controller = new SudokuController(model, view);
             view.setController(controller);

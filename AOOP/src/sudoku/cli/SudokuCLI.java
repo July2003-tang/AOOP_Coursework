@@ -1,5 +1,6 @@
 package sudoku.cli;
 
+import sudoku.model.SudokuGameModel;
 import sudoku.model.SudokuModel;
 
 import java.util.Scanner;
@@ -8,7 +9,7 @@ import java.util.Scanner;
 public class SudokuCLI {
     private static final String PUZZLE_FILE = "src/resources/puzzles.txt";
 
-    private final SudokuModel model;
+    private final SudokuGameModel model;
     private final Scanner scanner;
 
     public SudokuCLI() {

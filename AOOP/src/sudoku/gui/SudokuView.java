@@ -1,7 +1,7 @@
 package sudoku.gui;
 
 import sudoku.controller.SudokuController;
-import sudoku.model.SudokuModel;
+import sudoku.model.SudokuGameModel;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -30,7 +30,7 @@ public class SudokuView extends JFrame implements Observer {
     private static final Color CONFLICT_CELL_COLOR = new Color(254, 202, 202);
     private static final Color GRID_COLOR = new Color(30, 41, 59);
 
-    private final SudokuModel model;
+    private final SudokuGameModel model;
     private SudokuController controller;
 
     private final JButton[][] cellButtons;
@@ -44,7 +44,7 @@ public class SudokuView extends JFrame implements Observer {
     private int selectedRow;
     private int selectedCol;
 
-    public SudokuView(SudokuModel model) {
+    public SudokuView(SudokuGameModel model) {
         super("Sudoku");
         this.model = model;
         this.cellButtons = new JButton[9][9];
@@ -99,11 +99,27 @@ public class SudokuView extends JFrame implements Observer {
     }
 
     public void showMessage(String message) {
-        JOptionPane.showMessageDialog(this, message);
+        JOptionPane.showOptionDialog(
+                this,
+                message,
+                "Message",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                new Object[]{"OK"},
+                "OK");
     }
 
     public void showCompletionMessage() {
-        JOptionPane.showMessageDialog(this, "Congratulations! You completed the puzzle correctly.");
+        JOptionPane.showOptionDialog(
+                this,
+                "Congratulations! You completed the puzzle correctly.",
+                "Completed",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                new Object[]{"OK"},
+                "OK");
     }
 
     @Override

@@ -5,11 +5,10 @@ import java.util.Observable;
 import java.util.Random;
 
 // Main model class shared by both GUI and CLI.
-// Invariant:
-// board and solutionBoard are not null after construction.
-// Every cell value is between 0 and 9.
-// Fixed cells always keep their original puzzle values.
-public class SudokuModel extends Observable {
+// @invariant board != null && solutionBoard != null && puzzles != null
+// @invariant every board value is in the range 0..9
+// @invariant every fixed cell keeps its original puzzle value
+public class SudokuModel extends Observable implements SudokuGameModel {
     private static final int SIZE = 9;
 
     // Current board and solved copy used for hints.
@@ -38,8 +37,10 @@ public class SudokuModel extends Observable {
         assert hasValidState();
     }
 
-    // Pre: row and col may be any integers.
-    // Post: returns 0 for an invalid position, otherwise the value at that cell.
+    // @requires true
+    // @ensures invalid row/col ==> result == 0
+    // @ensures valid row/col ==> result == the value stored at that cell
+    // @ensures result >= 0 && result <= 9
     public int getValue(int row, int col) {
         int result;
         if (!isValidPosition(row, col)) {
@@ -53,8 +54,9 @@ public class SudokuModel extends Observable {
         return result;
     }
 
-    // Pre: row and col may be any integers.
-    // Post: returns true only for valid editable cells.
+    // @requires true
+    // @ensures result == true ==> row and col are inside the board
+    // @ensures result == true ==> the selected cell is editable
     public boolean isEditable(int row, int col) {
         boolean result;
         if (!isValidPosition(row, col)) {
@@ -68,8 +70,11 @@ public class SudokuModel extends Observable {
         return result;
     }
 
-    // Pre: row and col may be any integers, value may be any integer.
-    // Post: returns true only if an editable cell was changed to a digit 1-9.
+    // @requires true
+    // @ensures result == true ==> row and col are valid, the cell is editable, and 1 <= value <= 9
+    // @ensures result == true ==> getValue(row, col) == value
+    // @ensures result == false ==> invalid positions, fixed cells, invalid values, or unchanged values are rejected
+    // @ensures temporary duplicate values may be stored; validation is checked separately
     public boolean setValue(int row, int col, int value) {
         // The model rejects bad positions, fixed cells and non-digit values.
         if (!isValidPosition(row, col) || value < 1 || value > 9) {
@@ -103,8 +108,9 @@ public class SudokuModel extends Observable {
         return true;
     }
 
-    // Pre: row and col may be any integers.
-    // Post: returns true only if an editable non-empty cell was cleared.
+    // @requires true
+    // @ensures result == true ==> row and col are valid and the editable cell becomes empty
+    // @ensures result == false ==> invalid positions, fixed cells, and already empty cells are rejected
     public boolean clearValue(int row, int col) {
         if (!isValidPosition(row, col)) {
             assert hasValidState();
@@ -132,8 +138,10 @@ public class SudokuModel extends Observable {
         return true;
     }
 
-    // Pre: none.
-    // Post: if true, the last board action has been reverted and undo history is empty.
+    // @requires true
+    // @ensures result == true ==> the most recent board action is reverted
+    // @ensures result == true ==> hasUndo() == false
+    // @ensures result == false ==> there was no stored move to undo
     public boolean undo() {
         // Coursework only asks for single-level undo.
         if (lastMove == null) {
@@ -166,8 +174,10 @@ public class SudokuModel extends Observable {
         return true;
     }
 
-    // Pre: none.
-    // Post: if true, one empty editable cell is filled with its solution value.
+    // @requires true
+    // @ensures result == true ==> exactly one empty editable cell is filled with its solution value
+    // @ensures result == false ==> hint is disabled or no empty editable cell exists
+    // @ensures fixed cells are not changed
     public boolean hint() {
         // Fill the first empty editable cell with its solution value.
         if (!hintFlag) {
@@ -198,8 +208,10 @@ public class SudokuModel extends Observable {
         return false;
     }
 
-    // Pre: none.
-    // Post: all editable cells are empty and there is no undo move.
+    // @requires true
+    // @ensures all editable cells are empty
+    // @ensures fixed cells keep their original values
+    // @ensures hasUndo() == false
     public void reset() {
         board.reset();
         lastMove = null;
@@ -209,8 +221,10 @@ public class SudokuModel extends Observable {
         notifyModelChanged();
     }
 
-    // Pre: none.
-    // Post: a puzzle is loaded from the file and previous game state is discarded.
+    // @requires true
+    // @ensures a puzzle is loaded according to the puzzle selection flag
+    // @ensures all editable cells start empty
+    // @ensures hasUndo() == false
     public void newGame() {
         loadNewBoard();
         lastMove = null;
@@ -220,8 +234,9 @@ public class SudokuModel extends Observable {
         notifyModelChanged();
     }
 
-    // Pre: none.
-    // Post: true means the board is full and valid according to Sudoku rules.
+    // @requires true
+    // @ensures result == true ==> the board is full and valid according to Sudoku rules
+    // @ensures result == false ==> the board is incomplete or has a duplicate value
     public boolean isComplete() {
         // A puzzle is complete only when the board is full and valid.
         boolean result = board.isSolved();
@@ -230,8 +245,9 @@ public class SudokuModel extends Observable {
         return result;
     }
 
-    // Pre: none.
-    // Post: true means there are no duplicates in any row, column or 3x3 box.
+    // @requires true
+    // @ensures result == true ==> no row, column or 3x3 box contains duplicate non-zero values
+    // @ensures result == false ==> at least one row, column or 3x3 box has a duplicate value
     public boolean isBoardValid() {
         boolean result = true;
 
@@ -261,8 +277,10 @@ public class SudokuModel extends Observable {
         return result;
     }
 
-    // Pre: row and col may be any integers, value may be any integer.
-    // Post: true means the value is legal at that editable position.
+    // @requires true
+    // @ensures result == true ==> row and col are valid, the cell is editable, and 1 <= value <= 9
+    // @ensures result == true ==> placing value there does not break row, column, or 3x3 box rules
+    // @ensures result == false ==> the move is not a legal Sudoku move
     public boolean isValidMove(int row, int col, int value) {
         boolean result = isValidPosition(row, col) && board.isValidMove(row, col, value);
         assert !result || (isValidPosition(row, col) && value >= 1 && value <= 9 && board.isEditable(row, col));
@@ -270,8 +288,8 @@ public class SudokuModel extends Observable {
         return result;
     }
 
-    // Pre: none.
-    // Post: returns true if there is one move available to undo.
+    // @requires true
+    // @ensures result == true <==> one stored move is available for single-level undo
     public boolean hasUndo() {
         boolean result = lastMove != null;
         assert result == (lastMove != null);
@@ -279,8 +297,9 @@ public class SudokuModel extends Observable {
         return result;
     }
 
-    // Pre: row and col may be any integers.
-    // Post: true means this non-empty cell duplicates a value in its row, column or box.
+    // @requires true
+    // @ensures result == true ==> the selected non-empty cell duplicates a value in its row, column, or 3x3 box
+    // @ensures result == false ==> the position is invalid, empty, or has no duplicate conflict
     public boolean hasConflict(int row, int col) {
         // Used by the GUI and CLI to report duplicate values.
         if (!isValidPosition(row, col)) {
@@ -322,8 +341,8 @@ public class SudokuModel extends Observable {
         return false;
     }
 
-    // Pre: none.
-    // Post: returns a non-null text version of the board.
+    // @requires true
+    // @ensures result != null
     public String getBoardText() {
         String result = board.toString();
         assert result != null;

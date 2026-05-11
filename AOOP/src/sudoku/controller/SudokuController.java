@@ -1,14 +1,14 @@
 package sudoku.controller;
 
 import sudoku.gui.SudokuView;
-import sudoku.model.SudokuModel;
+import sudoku.model.SudokuGameModel;
 
 // The controller connects the GUI actions to the model.
 public class SudokuController {
-    private final SudokuModel model;
+    private final SudokuGameModel model;
     private final SudokuView view;
 
-    public SudokuController(SudokuModel model, SudokuView view) {
+    public SudokuController(SudokuGameModel model, SudokuView view) {
         this.model = model;
         this.view = view;
         updateControls();
